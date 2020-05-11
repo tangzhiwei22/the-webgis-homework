@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <title>Intro to MapView - Create a 2D map - 4.15</title>
+    <style type="text/css">
+      #div1 {
+        background-color: #3C3C3C;
+        padding: 0;
+        margin: 0;
+        height: 5%;
+        width: 100%;
+        float: right;
+      }
+      #div2 {
+        background-color: #3C3C3C;
+        float: left;
+        height: 10%;
+        width: 100%;
+      }
+      #div3 {
+        background-color: #272727;
+        height: 100%;
+        width: 20%;
+        float: left;
+      }
+      html,
+      body {
+        height: 100%;
+        width: 100%;
+      }
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 80%;
+        float: inherit;
+      }
+      
+      }
+    </style>
+
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.15/esri/themes/light/main.css"
+    />
+    <script src="https://js.arcgis.com/4.15/"></script>
+
+    <script>
+      require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/layers/FeatureLayer",
+        "esri/widgets/Legend",
+        "esri/widgets/ScaleBar",
+        "esri/widgets/Search"
+      ], function(Map, MapView, featurelayer, Lenged, ScaleBar, Search) {
+        var feature = new featurelayer({
+          url:
+            "http://www.arcgisonline.cn/server/rest/services/Hosted/%E6%AD%A6%E6%B1%89%E5%B8%82%E9%9D%9E%E7%B4%A7%E6%80%A5%E4%BA%8B%E4%BB%B6/FeatureServer"
+        });
+
+        var map = new Map({
+          basemap: "streets-night-vector",
+          layers: [feature]
+        });
+
+        var view = new MapView({
+          container: "viewDiv",
+          map: map,
+          zoom: 10,
+          center: [114.3, 30.6] // longitude, latitude
+        });
+
+        var lenged = new Lenged({
+          view: view,
+          layerInfos: [
+            {
+              layer: feature,
+              title: "公共服务事件类型"
+            }
+          ]
+        });
+
+        var scalebar = new ScaleBar({
+          view: view,
+          style: "ruler",
+          unit: "dual"
+        });
+
+        view.ui.add(scalebar, "bottom-left");
+        view.ui.add(lenged, "bottom-right");
+
+        var coordsWidget = document.createElement("div");
+        coordsWidget.id = "coordsWidget";
+        coordsWidget.className = "esri-widget esri-component";
+        coordsWidget.style.padding = "10px 15px 5px";
+
+        view.ui.add(coordsWidget, "bottom-right");
+
+        var search = new Search({
+          view: view
+        });
+
+        view.ui.add(search, "top-right");
+
+        function showCoordinates(pt) {
+          var coords =
+            "Lat/Lon " +
+            pt.latitude.toFixed(3) +
+            " " +
+            pt.longitude.toFixed(3) +
+            " | Scale 1:" +
+            Math.round(view.scale * 1) / 1 +
+            " | Zoom " +
+            view.zoom;
+          coordsWidget.innerHTML = coords;
+        }
+
+        view.watch("stationary", function(isStationary) {
+          showCoordinates(view.center);
+        });
+
+        view.on("pointer-move", function(evt) {
+          showCoordinates(view.toMap({ x: evt.x, y: evt.y }));
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="div1"><font color="##46A3FF">武汉公共事件一览图</font></div>
+    <div id="div2"><font color="#46A3FF">
+      武汉，简称“汉”，别称江城，是湖北省省会，中部六省唯一的副省级市，特大城市，国务院批复确定的中国中部地区的中心城市，全国重要的工业基地、科教基地和综合交通枢纽 。武汉是国家历史文化名城、楚文化的重要发祥地，境内盘龙城遗址有3500年历史。春秋战国以来，武汉一直是中国南方的军事和商业重镇，明清时期成为楚中第一繁盛处、天下四聚之一。</font>
+    </div>
+    <div id="div3">
+      <a
+        href="https://baike.baidu.com/item/%E6%AD%A6%E6%B1%89/106764?fr=aladdin"
+      >
+        <img
+          src="https://bkimg.cdn.bcebos.com/pic/241f95cad1c8a7867d9c86716a09c93d70cf501f?x-bce-process=image/resize,m_lfit,w_268,limit_1/format,f_jpg"
+      /></a>
+    </div>
+    <div id="viewDiv"></div>
+    
+  </body>
+</html>
